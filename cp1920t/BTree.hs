@@ -1,6 +1,6 @@
 {-# OPTIONS_GHC -XNPlusKPatterns #-}
 
--- (c) MP-I (1998/9-2006/7) and CP (2005/6-2019/20)
+-- (c) MP-I (1998/9-2006/7) and CP (2005/6-2016/7)
 
 module BTree where
 
@@ -19,17 +19,19 @@ outBTree :: BTree a -> Either () (a,(BTree a,BTree a))
 outBTree Empty              = Left ()
 outBTree (Node (a,(t1,t2))) = Right(a,(t1,t2))
 
-baseBTree g f = id -|- (g >< (f >< f))
-
 -- (2) Ana + cata + hylo -------------------------------------------------------
 
-recBTree f = baseBTree id f
+-- recBTree g = id -|- (id >< (g >< g))
+
+recBTree g = baseBTree id g
 
 cataBTree g = g . (recBTree (cataBTree g)) . outBTree
 
 anaBTree g = inBTree . (recBTree (anaBTree g) ) . g
 
 hyloBTree h g = cataBTree h . anaBTree g
+
+baseBTree f g = id -|- (f >< (g >< g))
 
 -- (3) Map ---------------------------------------------------------------------
 
@@ -55,13 +57,15 @@ inordt = cataBTree inord                   -- in-order traversal
 
 -- where
 
-preord = either nil f where f(x,(l,r))=x:l++r
-inord  = either nil f where f(x,(l,r))=l++[x]++r
-posord = either nil f where f(x,(l,r))=l++r++[x]
+inord = either nil join
+        where join(x,(l,r))=l++[x]++r
 
 preordt = cataBTree preord -- pre-order traversal
 
-postordt = cataBTree posord
+preord = (either nil f) where  f(x,(l,r))=x:l++r
+
+postordt = cataBTree (either nil f) -- post-order traversal
+           where  f(x,(l,r))=l++r++[x]
 
 -- (4.4) Quicksort -------------------------------------------------------------
 
@@ -76,18 +80,18 @@ qsep (h:t) = Right (h,(s,l)) where (s,l) = part (<h) t
 part:: (a -> Bool) -> [a] -> ([a], [a])
 part p []                = ([],[])
 part p (h:t) | p h       = let (s,l) = part p t in (h:s,l)
-     | otherwise = let (s,l) = part p t in (s,h:l)
+             | otherwise = let (s,l) = part p t in (s,h:l)
 
 {-- pointwise versions:
 qSort [] = []
 qSort (h:t) = let (t1,t2) = part (<h) t
-      in  qSort t1 ++ [h] ++ qSort t2
+              in  qSort t1 ++ [h] ++ qSort t2
 
 or, using list comprehensions:
 
 qSort [] = []
 qSort (h:t) = qSort [ a | a <- t , a < h ] ++ [h] ++ 
-      qSort [ a | a <- t , a >= h ]
+              qSort [ a | a <- t , a >= h ]
 
 --}
 
@@ -95,7 +99,10 @@ qSort (h:t) = qSort [ a | a <- t , a < h ] ++ [h] ++
 
 traces :: Eq a => BTree a -> [[a]]
 traces = cataBTree (either (const [[]]) tunion)
-   where tunion(a,(l,r)) = union (map (a:) l) (map (a:) r) 
+
+-- where
+
+tunion(a,(l,r)) = union (map (a:) l) (map (a:) r) 
 
 -- (4.6) Towers of Hanoi -------------------------------------------------------
 
@@ -110,11 +117,11 @@ hanoi = hyloBTree present strategy
 present = inord -- same as in qSort
 
 strategy(d,0) = Left ()
-strategy(d,n+1) = Right ((d,n),((not d,n),(not d,n)))
+strategy(d,n+1) = Right ((n,d),((not d,n),(not d,n)))
 
 {--
     The Towers of Hanoi problem comes from a puzzle marketed in 1883
-    by the French mathematician Ã‰douard Lucas, under the pseudonym
+    by the French mathematician Édouard Lucas, under the pseudonym
     Claus. The puzzle is based on a legend according to which
     there is a temple, apparently in Bramah rather than in Hanoi as
     one might expect, where there are three giant poles fixed in the
@@ -128,7 +135,7 @@ strategy(d,n+1) = Right ((d,n),((not d,n),(not d,n)))
     the day that they completed their task the world would come to
     an end!
     
-    There is a wellÂ­known inductive solution to the problem given
+    There is a well­known inductive solution to the problem given
     by the pseudocode below. In this solution we make use of the fact
     that the given problem is symmetrical with respect to all three
     poles. Thus it is undesirable to name the individual poles. Instead
@@ -141,18 +148,18 @@ strategy(d,n+1) = Right ((d,n),((not d,n),(not d,n)))
     to the smallest rather than the largest disk has the advantage
     that the number of the disk that is moved on any day is independent
     of the total number of disks to be moved.) Directions are boolean
-    values, true representing a clockwise movement and false an antiÂ­clockwise
+    values, true representing a clockwise movement and false an anti­clockwise
     movement. The pair (k,d') means move the disk numbered k from
     its current position in the direction d'. The semicolon operator
     concatenates sequences together, [] denotes an empty sequence
     and [x] is a sequence with exactly one element x. Taking the pairs
     in order from left to right, the complete sequence H n d prescribes
-    how to move the n smallest disks oneÂ­byÂ­one from one pole to the
+    how to move the n smallest disks one­by­one from one pole to the
     next pole in the direction d following the rule of never placing
     a larger disk on top of a smaller disk.
     
     H 0     d = [],
-    H (n+1) d = H n Â¬d ; [ (n, d) ] ; H n Â¬d.
+    H (n+1) d = H n ¬d ; [ (n, d) ] ; H n ¬d.
     
     (excerpt from R. Backhouse, M. Fokkinga / Information Processing
     Letters 77 (2001) 71--76)

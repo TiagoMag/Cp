@@ -1,6 +1,6 @@
 {-# OPTIONS_GHC -XNPlusKPatterns #-}
 
--- (c) MP-I (1998/9-2006/7) and CP (2005/6-2019/20)
+-- (c) MP-I (1998/9-2006/7) and CP (2005/6-2018/9)
 
 module Nat where
 

@@ -1,5 +1,5 @@
 
--- (c) MP-I (1998/9-2006/7) and CP (2005/6-2019/20)
+-- (c) MP-I (1998/9-2006/7) and CP (2005/6-2016/7)
 
 module LTree where
 
@@ -18,13 +18,13 @@ outLTree :: LTree a -> Either a (LTree a,LTree a)
 outLTree (Leaf a)       = i1 a
 outLTree (Fork (t1,t2)) = i2 (t1,t2)
 
-baseLTree g f = g -|- (f >< f)
-
 -- (2) Ana + cata + hylo -------------------------------------------------------
 
 recLTree f = baseLTree id f          -- that is:  id -|- (f >< f)
 
-cataLTree g = g . (recLTree (cataLTree g)) . outLTree
+baseLTree g f = g -|- (f >< f)
+
+cataLTree a = a . (recLTree (cataLTree a)) . outLTree
 
 anaLTree f = inLTree . (recLTree (anaLTree f) ) . f
 
@@ -53,6 +53,7 @@ countLTree = cataLTree (either one add)
 -- (4.2) Serialization ---------------------------------------------------------
 
 tips = cataLTree (either singl conc)
+        where conc(l,r)= l ++ r
 
 -- (4.3) Double factorial ------------------------------------------------------
 
@@ -133,14 +134,6 @@ dmap1 f x = (hyloLTree (either (singl.f) conc) divide) x
      where divide [x] = i1 x
            divide l   = i2 (split (take m) (drop m) l) where m = div (length l) 2
 
--- (4.8) Combinations ----------------------------------------------------------
-
-comb = hyloLTree (either id add) divide
-
-divide(n,k) = if k `elem` [0,n] then i1 1 else i2((n-1,k),(n-1,k-1))
-
-{-- pointwise: comb (n,k) = if k `elem` [0,n] then 1 else comb(n-1,k)+comb(n-1,k-1) --}
-
 -- (5) Monad -------------------------------------------------------------------
 
 instance Monad LTree where
@@ -195,34 +188,5 @@ plug ((Dr True  r):z) t = Fork (r,plug z t)
 instance Applicative LTree where
     pure = return
     (<*>) = aap
-
--- (9) Spine representation --------------------------------------------------
-
-roll = inLTree.(id -|- roll>< id).beta.(id><outList')
-
-spinecata g = g . (id -|- (spinecata g)>< id).spineOut
-
-spineOut = beta.(id><outList')
-
-outList' [] = i1()
-outList' x = i2(last x, blast x)
-
-blast = reverse . tail . reverse
-
-inList' = either nil snoc
-
-snoc(a,x)= x++[a]
-
-unroll = (id><inList').alpha.(id -|- unroll>< id).outLTree
-
-alpha :: Either a ((a, t), t1) -> (a, Either () (t1, t))
-alpha(Left a) = (a,Left())
-alpha(Right ((a,ts),t)) = (a,Right(t,ts))
-
-beta :: (a, Either () (t1, t)) -> Either a ((a, t), t1)
-beta(a,Left()) = Left a
-beta(a,Right(t,ts)) = Right ((a,ts),t)
-
-height = cataLTree (either id (uncurry ht)) where ht a b = 1 + (max a b)
 
 ---------------------------- end of library ----------------------------------
