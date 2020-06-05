@@ -115,7 +115,7 @@
 \begin{tabular}{ll}
 \textbf{Grupo} nr. & 99 (preencher)
 \\\hline
-a11111 & Nome1 (preencher)	
+a85517 & Duarte Manuel Vilar de Oliveira
 \\
 a22222 & Nome2 (preencher)	
 \\
