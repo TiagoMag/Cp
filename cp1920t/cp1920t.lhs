@@ -188,9 +188,10 @@ import System.Random  hiding (split)
 import System.Process
 import GHC.IO.Exception
 import Graphics.Gloss
-import Control.Monad
+import Control.Monad as M 
 import Control.Applicative hiding ((<|>))
 import Exp
+import Data.Maybe
 \end{code}
 %endif
 
@@ -968,82 +969,168 @@ outras funções auxiliares que sejam necessárias.
 
 \subsection*{Problema 1}
 \begin{code}
+
+
 discollect :: (Ord b, Ord a) => [(b, [a])] -> [(b, a)]
-discollect = undefined
+discollect = cataList g where
+  g = either nil f
+  f = uncurry (++) . (k >< id)
+  k (a,b) = foldr (\x acc->(a,x):acc) [] b
 
 dic_exp :: Dict -> [(String,[String])]
 dic_exp = collect . tar
 
 tar = cataExp g where
-  g = undefined
+  g = either f k
+  f = singl . (,) ""
+  k (a,lst) = concatMap (map ((++) a >< id)) lst
 
-dic_rd = undefined
+dic_rd p t = hyloExp cata ana $ (p,t) where
+  ana (p, Var o) = i1 o
+  ana (p, Term o l) | length p == 0 = i2(o,k(p,[]))
+                    | length o == 0 = i2(o,k(p,l))
+                    | singl (head  p) == o = i2 (o, k (tail p,l))
+                    | otherwise = i2 (o, [])
+  k (a,b) = foldr (\x acc->(a,x):acc) [] b
+  cata = either (Just . singl) h
+  h =  Cp.cond ((==) ([]) . nub . concat . catMaybes . p2) (const Nothing) (Just . nub . concat . catMaybes . p2)
 
-dic_in = undefined
+
+dic_in p t d = undefined 
 
 \end{code}
 
 \subsection*{Problema 2}
 
+\begin{eqnarray*}
+\xymatrix@@C=2cm{
+    |BTree a|
+           \ar[d]_-{|cataNat g|}
+&
+    |1 + A + X^2|
+           \ar[d]^{| (Maybe a)) + maisDir|}
+           \ar[l]_-{|inBTree|}
+\\
+     |Maybe a|
+&
+     |1+ A >< expn ((M)) 2|
+           \ar[l]^-{|g|}
+}
+\end{eqnarray*}
+
 \begin{code}
 maisDir = cataBTree g
-  where g = undefined
-
+  where g = either (const Nothing)(w)
+        w (a,(_,Nothing)) = Just a
+        w (a,(_,Just b)) = Just b 
+        
 maisEsq = cataBTree g
-  where g = undefined
-
+  where g = either (const Nothing)(w)
+        w (a,(Nothing,_)) = Just a
+        w (a,(Just b,_)) = Just b
+        
+        
 insOrd' x = cataBTree g 
-  where g = undefined
-
-insOrd a x = undefined
-
+  where g = either (const (Node (x,(Empty,Empty)), Empty)) (w)
+        w (a,((subesq,subesqog),(subdir,subdirog))) 
+                              | x<a = ((Node (a,(subesq,subdirog))),(Node (a,(subesqog,subdirog))))
+                              | x>a = ((Node (a,(subesqog,subdir))),(Node (a,(subesqog,subdirog))))
+                              | otherwise = ((Node (a,(subesqog,subdirog))),(Node (a,(subesqog,subdirog))))
+insOrd a x = p1 $ insOrd' a x 
 isOrd' = cataBTree g
-  where g = undefined
-
-isOrd = undefined
-
-
-rrot = undefined
-
-lrot = undefined
-
-splay l t =  undefined
-  
+  where g = either (const (True,Empty)) (c)
+        c (a,((False,b2),(c1,c2))) = (False, Node (a,(b2, c2)))
+        c (a,((b1,b2),(False,c2))) = (False, Node (a,(b2, c2)))
+        c (a,((True,b2),(True,c2))) = case (maisDir b2, maisEsq c2) of 
+                                          (Nothing,Nothing) -> (True,Node (a,(b2,c2)))  
+                                          (Just x, Nothing) -> (x<=a,Node (a,(b2,c2)))
+                                          (Nothing, Just x) -> (x>=a,Node (a,(b2,c2)))
+                                          (Just x, Just y)  -> (x<=a && y>=a,Node (a,(b2,c2)))
+        
+isOrd = p1. isOrd' 
+rrot a@(Node (rz,(Empty,tr))) =  a  
+rrot a@(Node (rz,(Node (l,(ll,lr)) ,tr))) = Node (l,(ll,Node (rz,(lr,tr))))
+lrot  a@(Node (rz,(tl,Empty))) =  a  
+lrot  a@(Node (rz,(tl,Node (r,(rl,rr))))) = Node (r,(Node(rz,(tl,rl)),rr))
+--BTree a -> [Bool] -> BTree
+splay l t =  (flip cataBTree t g) l
+          where g = either (\x->const Empty) (curry k)
+                k ((raiz, (t1, t2)), l) = if length l == 0
+                                      then Node (raiz, ((t1 l), (t2 l)))
+                                   else if head l then rrot $ Node(raiz, ((t1 (tail l)),(t2 [])))
+                                  else lrot $ Node(raiz, ((t1 []),(t2 (tail l))))
+          {-
+                k raiz t1 t2 = if list == empty  then Node raiz t1 t2
+                                else list!= empty { (x:xs)
+                                if x then lrot Node(rz t1,t2)
+                                  else rrot (Node rz t1,t2)
+                              }
+          -}
 \end{code}
 
 \subsection*{Problema 3}
 
 \begin{code}
+
+bdtGC:: Bdt [Char]
+bdtGC = Query("Chuva na ida?",(Dec "Precisa",Query("Chuva no regresso",
+              (Dec "Precisa",Dec "N precisa"))))
+
 extLTree :: Bdt a -> LTree a
 extLTree = cataBdt g where
-  g = undefined
+  g = either Leaf (Fork . p2)
 
-inBdt = undefined
+inBdt = either Dec Query
 
-outBdt = undefined
+outBdt (Dec a) = i1 a
+outBdt (Query (s,(q1,q2))) = i2 (s,(q1,q2))
 
-baseBdt = undefined
-recBdt = undefined
+baseBdt f g h = f -|- (g >< (h><h))
 
-cataBdt = undefined
+recBdt f = baseBdt id id f
 
-anaBdt = undefined
+cataBdt g = g . (recBdt (cataBdt g)) . outBdt
+
+anaBdt g = inBdt . (recBdt (anaBdt g) ) . g
 
 navLTree :: LTree a -> ([Bool] -> LTree a)
-navLTree = cataLTree g 
-  where g = undefined
+navLTree lt lstB = (cataLTree g lt) lstB where 
+  g = either (curry g1) (curry g2)
+  g1 (a,_) = Leaf a
+  g2 ((l,r),lst) | length lst == 0 = Fork(l lst,r lst)
+                 | head lst == True = l $ tail $ lst
+                 | otherwise = r $ tail $ lst
+                  
 \end{code}
 
 
 \subsection*{Problema 4}
+ 
 
 \begin{code}
-bnavLTree = cataLTree g
-  where g = undefined
+
+anita :: Bdt [Char]
+anita = Query("2a-feira?",(Query("Chuva na ida?",(Dec "Precisa",Query("Chuva no regresso",
+        (Dec "Precisa",Dec "N precisa")))),Dec "N precisa"))
+
+bnavLTree lt bt = (cataLTree g lt) bt
+  where g = either (curry g1) (curry g2)
+        g1(a,_) = Leaf a
+        g2((l,r),Empty) = Fork(l Empty,r Empty)
+        g2((l,r),Node (rz,(Empty,Empty))) | rz == True  = l $ Empty
+                                          | rz == False = r $ Empty
+        g2((l,r),Node (rz,(t1,Empty))) | rz == True = l $ t1
+                                       | rz == False = r $ t1
+        g2((l,r),Node (rz,(Empty,t2))) | rz == True = l $ t2
+                                       | rz == False = r $ t2
 
 
-pbnavLTree = cataLTree g
-  where g = undefined 
+pbnavLTree lt bt = cataLTree g lt bt
+  where g = either (curry g1) (curry g2)
+        g1(a,bt) = return (Leaf a,bt)
+        g2((l,r),Empty) = return (Fork(l Empty,r Empty))
+        g2((l,r),Node (D((bool,p):xs),(Empty,Empty))) | bool == True = return(l Empty)
+                                                    
 
 \end{code}
 
@@ -1067,6 +1154,24 @@ janela = InWindow
 put  = uncurry Translate 
 
 -------------------------------------------------
+geraTrunchet (a,b) = fmap pictures $ M.join $ fmap (permuta.map (uncurry put)) $ liftM2 zip posicoes mosaicos
+                    where mosaicos = auxGera (a*b)
+                          posicoes = return $ map (toFloat >< toFloat) $ geraLista (a,b) 
+
+
+monadCompo :: (Int,Int) -> IO()
+monadCompo = geraTrunchet >=> display janela white 
+
+--gera mosaicos aleatorios
+auxGera :: Int -> IO [Picture]
+auxGera x = replicateM x (fmap f $ randomRIO(0::Integer,1::Integer)) 
+          where f a = if a==0 then truchet1 else truchet2
+
+geraLista :: (Int,Int)-> [(Int,Int)]
+geraLista (x,y) = map f $[(a,b)| a<-[0..x-1], b<-[0..y-1]]
+                where (se1,se2) = (x*(-40),y*(-40)) 
+                      f (i,j) = (se1+(i*80),se2+(j*80))
+
 \end{code}
 
 %----------------- Fim do anexo com soluções dos alunos ------------------------%

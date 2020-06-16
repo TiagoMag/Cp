@@ -24,9 +24,9 @@ mopen = ("open    "++)
 
 --2) Mac OS
 
-open = mopen 
+open = mopen
 
-expShow fn e = do { expDisplay fn (mirrorExp e) ; system(open fn) } 
+expShow fn e = do { expDisplay fn (mirrorExp e) ; system(open fn) }
 
 -- (1) Datatype definition -----------------------------------------------------
 
@@ -93,7 +93,7 @@ exp2Html n (Term o l) = g (expWidth (Term o l)) o (map (exp2Html (n-1)) l)
                         where g i o k = [ ICell o 1 i ] ++ (foldr (++) [] k)
 
 expDisplay :: FilePath -> Exp String String -> IO ()
-expDisplay fn = writeFile fn . exp2txt where 
+expDisplay fn = writeFile fn . exp2txt where
       exp2txt = concat . txtFlat . (html2Txt Str) .  (uncurry exp2Html . (split expDepth id))
 
 type Html a = [ Cell a ]
@@ -117,7 +117,7 @@ txtFlat (Blk []) = []
 txtFlat (Blk (a:l)) = txtFlat a ++ txtFlat (Blk l)
 
 html2Txt :: (a -> Txt) -> Html a -> Txt
-html2Txt f = html . table . (foldr g u) 
+html2Txt f = html . table . (foldr g u)
              where u = Str "\n</tr>"
                    g c (Str s) = g c (Blk [Str s])
                    g (ICell a x y) (Blk b) = Blk ([ cell (f a) x y ] ++ b)
@@ -157,7 +157,7 @@ instance (Show a) => Expclass (BTree a) where
 
 cBTree2Exp :: BTree a -> Exp [Char] a
 cBTree2Exp = cataBTree (either (const (Var "Empty")) h)
-             where h(a,(b,c)) = Term a [b,c] 
+             where h(a,(b,c)) = Term a [b,c]
 --------------------------------------------------------------------------------
 instance (Show a) => Expclass [a] where
     pict = expShow "_.html" .  cL2Exp . (fmap show)
@@ -170,7 +170,7 @@ instance (Show a) => Expclass (LTree a) where
     pict = expShow "_.html" .  cLTree2Exp . (fmap show)
 
 cLTree2Exp = cataLTree (either Var h)
-             where h(a,b) = Term "Fork" [a,b] 
+             where h(a,b) = Term "Fork" [a,b]
 --------------------------------------------------------------------------------
 cFTree2Exp = cataFTree (inExp . (id -|- (id><f))) where f(a,b)=[a,b]
 --------------------------------------------------------------------------------
@@ -193,7 +193,7 @@ untar = a . (base id id untar) . c where
    base a b y = map(b -|- a >< y)
 
 collect :: (Ord b, Ord a) => [(b, a)] -> [(b, [a])]
-collect x = set [ k |-> set [ d' | (k',d') <- x , k'==k ] | (k,d) <- x ]   
+collect x = set [ k |-> set [ d' | (k',d') <- x , k'==k ] | (k,d) <- x ]
 
 set :: Ord a => [a] -> [a]
 set = sort . nub
