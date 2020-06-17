@@ -1467,7 +1467,7 @@ put  = uncurry Translate
 
   \begin{figure}[H]\centering       
   \includegraphics[scale=0.285]{images/moisaico.png}
-  \caption{Um do moisaicos gerados}
+  \caption{Um dos moisaicos gerados}
   \label{fig:m}          
   \end{figure}
 
