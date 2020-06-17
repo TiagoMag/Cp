@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Arch Linux) (preloaded format=pdflatex 2020.6.6)  17 JUN 2020 18:42
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Arch Linux) (preloaded format=pdflatex 2020.6.6)  17 JUN 2020 18:52
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -984,7 +984,7 @@ Overfull \hbox (15.81006pt too wide) in paragraph at lines 2053--2098
 File: images/moisaico.png Graphic file (type png)
 <use images/moisaico.png>
 Package pdftex.def Info: images/moisaico.png  used on input line 2101.
-(pdftex.def)             Requested size: 110.65866pt x 110.95976pt.
+(pdftex.def)             Requested size: 206.57034pt x 207.13243pt.
 (./cp1920t.ind [20 <./images/moisaico.png>] [21
 
 
@@ -1001,16 +1001,12 @@ Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 2118.
 
 Package rerunfilecheck Info: File `cp1920t.out' has not changed.
 (rerunfilecheck)             Checksum: 628570B73880F7F6B343CF9F839CDB98;365.
-
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 2118.
  ) 
 Here is how much of TeX's memory you used:
  13360 strings out of 492167
  189023 string characters out of 6131559
- 359480 words of memory out of 5000000
+ 359495 words of memory out of 5000000
  17339 multiletter control sequences out of 15000+600000
  37140 words of font info for 111 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
@@ -1036,7 +1032,7 @@ type1/public/amsfonts/symbols/msbm10.pfb></usr/share/texmf-dist/fonts/type1/urw
 st/fonts/type1/urw/palatino/uplr8a.pfb></usr/share/texmf-dist/fonts/type1/urw/p
 alatino/uplri8a.pfb></usr/share/texmf-dist/fonts/type1/public/xypic/xyatip10.pf
 b></usr/share/texmf-dist/fonts/type1/public/xypic/xybtip10.pfb>
-Output written on cp1920t.pdf (22 pages, 683779 bytes).
+Output written on cp1920t.pdf (22 pages, 683773 bytes).
 PDF statistics:
  445 PDF objects out of 1000 (max. 8388607)
  376 compressed objects within 4 object streams
