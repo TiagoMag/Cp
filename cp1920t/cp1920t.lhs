@@ -6,6 +6,7 @@
 \usepackage{cp1920t}
 \usepackage{subcaption}
 \usepackage{adjustbox}
+\usepackage{float}
 \usepackage{color}
 %================= local x=====================================================%
 \def\getGif#1{\includegraphics[width=0.3\textwidth]{cp1920t_media/#1.png}}
@@ -85,7 +86,10 @@
 %format .&&&. = "\wedge"
 %format cdots = "\cdots "
 %format pi = "\pi "
-
+%format (expn (a) (n)) = "{" a "}^{" n "}"
+%format (expl (a)) = "{" a "}^*"
+%format (cata (g)) = "\cata{" g "}"
+%format (ana (g)) = "\ana{" g "}"
 %---------------------------------------------------------------------------
 
 \title{
@@ -117,7 +121,7 @@
 \\\hline
 a85517 & Duarte Manuel Vilar de Oliveira
 \\
-a22222 & Nome2 (preencher)	
+a84485 & Tiago Henrique de Oliveira Magalhães	
 \\
 a33333 & Nome3 (preencher)	
 \end{tabular}
@@ -967,76 +971,237 @@ propostos, de acordo com o "layout" que se fornece. Não podem ser
 alterados os nomes ou tipos das funções dadas, mas pode ser adicionado texto e/ou 
 outras funções auxiliares que sejam necessárias.
 
-\subsection*{Problema 1}
-\begin{code}
+\newpage
 
+\subsection*{Problema 1}
+
+\subsubsection*{Discollect}
+
+\par Para definir esta função utilizamos um catamorfismo que a cada par da lista
+o decompõe numa lista de pares, isto é seja (1,[1,2]) um par este seria decomposto na 
+seguinte lista : [(1,1),(1,2)].
+
+\begin{eqnarray*}
+\xymatrix@@C=4cm{
+    |expl((A >< expl B))|
+           \ar[d]_-{|cata (either nil (uncurry (++) . (k >< id))|}
+           \ar[r]^-{|outList|}
+&
+    |1+expl(( A >< B)) >< expl((A >< expl B))|
+           \ar[d]^{|id + id >< cata (either nil (uncurry (++) . (k >< id)) |}
+\\
+     |expl((A >< B))|
+&
+     |1 + expl((A >< B)) >< expl((A >< B))|
+           \ar[l]^-{|either nil (uncurry (++) . (k >< id)|}
+}
+\end{eqnarray*}
+
+\begin{code}
 
 discollect :: (Ord b, Ord a) => [(b, [a])] -> [(b, a)]
 discollect = cataList g where
-  g = either nil f
-  f = uncurry (++) . (k >< id)
+  g = either nil (uncurry (++) . (k >< id))
   k (a,b) = foldr (\x acc->(a,x):acc) [] b
+
+\end{code}
+
+\subsubsection*{Dic\_Exp / Tar}
+
+\par De modo a conseguirmos exportar um dicionário era necessário utilizar a função $dic\_exp$ 
+que já  se encontrava definida como um composição de funções (collect . tar), no entanto foi necessário 
+definir a função tar, para isso utilizamos um catamorfimo que a cada letra de uma palavra a adicionava ao seu 
+par(palavra/tradução).
+
+\begin{eqnarray*}
+\xymatrix@@C=4cm{
+    |Exp String String|
+           \ar[d]_-{|cata (either f k)|}
+           \ar[r]^-{|outList|}
+&
+    |String + String >< expl((Exp String String))|
+           \ar[d]^{|id + id >< map (cata (either f k)) |}
+\\
+     |expl((String >< String))|
+&
+     |String + String >< expl((expl((String >< String))))|
+           \ar[l]^-{|either f k |}
+}
+\end{eqnarray*}
+
+
+
+\begin{code}
 
 dic_exp :: Dict -> [(String,[String])]
 dic_exp = collect . tar
 
+tar :: Dict -> [(String,String)]
 tar = cataExp g where
   g = either f k
   f = singl . (,) ""
   k (a,lst) = concatMap (map ((++) a >< id)) lst
 
-dic_rd p t = hyloExp cata ana $ (p,t) where
-  ana (p, Var o) = i1 o
-  ana (p, Term o l) | length p == 0 = i2(o,k(p,[]))
-                    | length o == 0 = i2(o,k(p,l))
-                    | singl (head  p) == o = i2 (o, k (tail p,l))
-                    | otherwise = i2 (o, [])
+\end{code}
+
+\newpage
+\subsubsection*{Dic\_Rd}
+
+\par Neste exercício usamos um hilomorfismo, em que o anamorfimo vai percorrer a àrvore
+e construir uma àrvore com a palavra procurada e as respetivas traduções, enquanto que o
+catamorfismo irá devolver as traduções.
+\begin{eqnarray*}
+\xymatrix@@C=4cm{
+    |expl String|
+&
+    |String + String >< expl((expl((String))))|
+           \ar[l]_-{|traducoes|}
+\\
+     |Exp String String|
+           \ar[u]^-{|cata traducoes|}
+&
+     |String + String >< expl((Exp String String))|
+           \ar[u]_-{|id + id >< map(cata traducoes)|}
+           \ar[l]_-{|inExp|}
+\\
+     |String >< (Exp String String)|
+           \ar[u]^-{|ana procura|}
+           \ar[r]_-{|procura|}
+&
+     |String + String >< (String >< expl((Exp String String)))|
+           \ar[u]_-{|id + id >< map(ana procura)|}
+}
+\end{eqnarray*}
+
+\begin{code}
+
+dic_rd :: String -> (Exp String String) -> Maybe[String]
+dic_rd p t = hyloExp traducoes procura $ (p,t) where
+  procura (p, Var o) = i1 o
+  procura(p, Term o l) | length p == 0 = i2(o,k(p,[]))
+                       | length o == 0 = i2(o,k(p,l))
+                       | singl (head  p) == o = i2 (o, k (tail p,l))
+                       | otherwise = i2 (o, [])
   k (a,b) = foldr (\x acc->(a,x):acc) [] b
-  cata = either (Just . singl) h
+  traducoes = either (Just . singl) h
   h =  Cp.cond ((==) ([]) . nub . concat . catMaybes . p2) (const Nothing) (Just . nub . concat . catMaybes . p2)
-
-
-dic_in p t d = undefined 
 
 \end{code}
 
+\begin{code}
+dic_in :: String -> String -> Dict -> Dict
+dic_in p t d = undefined
+\end{code}
+\newpage
 \subsection*{Problema 2}
+
+\subsubsection*{maisDir e maisEsq}
+Para as funções "maisDir" e "maisEsq" procedeu-se de forma similar: empregou-se um catamorfismo ligeramente distinto entre si a ambas as funções. Este, iterando sobre as sub-àrvores da Binary Tree principal, procedia ao calculo do elemento mais à esquerda, no caso da função "maisEsq", ou mais à direita, no caso da "maisDir".
+Para todos os seguintes diagramas é de notar que A = BTree a.
 
 \begin{eqnarray*}
 \xymatrix@@C=2cm{
     |BTree a|
            \ar[d]_-{|cataNat g|}
 &
-    |1 + A + X^2|
-           \ar[d]^{| (Maybe a)) + maisDir|}
+    |1 + A + expn (X) 2|
+           \ar[d]^{| id + id >< expn (maisDir) 2|}
            \ar[l]_-{|inBTree|}
 \\
      |Maybe a|
 &
-     |1+ A >< expn ((M)) 2|
+     |1+ A >< expn (M) 2|
            \ar[l]^-{|g|}
 }
 \end{eqnarray*}
 
 \begin{code}
+
 maisDir = cataBTree g
   where g = either (const Nothing)(w)
         w (a,(_,Nothing)) = Just a
         w (a,(_,Just b)) = Just b 
-        
+
+\end{code} 
+
+\begin{eqnarray*}
+\xymatrix@@C=2cm{
+    |BTree a|
+           \ar[d]_-{|cataNat g|}
+&
+    |1 + A + expn (X) 2|
+           \ar[d]^{| id + id >< expn (maisEsq) 2|}
+           \ar[l]_-{|inBTree|}
+\\
+     |Maybe a|
+&
+     |1+ A >< expn (M) 2|
+           \ar[l]^-{|g|}
+}
+\end{eqnarray*}
+\begin{code}
+
 maisEsq = cataBTree g
   where g = either (const Nothing)(w)
         w (a,(Nothing,_)) = Just a
         w (a,(Just b,_)) = Just b
-        
-        
+
+\end{code}
+
+\subsubsection*{insOrd e isOrd}
+
+Para ambas as funções seguimos o conselho dado no enunciado. Simplificamos o problema, dividindo-o, e definimos em insOrd' e isOrd' 
+os catamorfimos que  iteram sobre a árvore binária principal. Para o caso da insOrd retira-se do catamorfismo a árvore original modificada 
+com o novo elemento adicionado, enquanto que na isOrd retira-se o Bool que indica se a árvore está, ou não, convenientemente ordenada.
+
+\begin{eqnarray*}
+\xymatrix@@C=2cm{
+    |BTree a|
+           \ar[d]_-{|cataNat g|}
+&
+    |1 + A + expn (X) 2|
+           \ar[d]^{| id + id >< expn (insOrd') 2|}
+           \ar[l]_-{|inBTree|}
+\\
+     |A><A|
+&
+     |1 + A >< expn ((A><A)) 2|
+           \ar[l]^-{|g|}
+}
+\end{eqnarray*}
+
+\begin{code} 
+
+insOrd a x = p1 $ insOrd' a x 
+
 insOrd' x = cataBTree g 
   where g = either (const (Node (x,(Empty,Empty)), Empty)) (w)
         w (a,((subesq,subesqog),(subdir,subdirog))) 
                               | x<a = ((Node (a,(subesq,subdirog))),(Node (a,(subesqog,subdirog))))
                               | x>a = ((Node (a,(subesqog,subdir))),(Node (a,(subesqog,subdirog))))
-                              | otherwise = ((Node (a,(subesqog,subdirog))),(Node (a,(subesqog,subdirog))))
-insOrd a x = p1 $ insOrd' a x 
+                              | otherwise = ((Node (a,(subesqog,subdirog))),(Node (a,(subesqog,subdirog))))       
+isOrd = p1 . isOrd' 
+
+\end{code}
+
+\begin{eqnarray*}
+\xymatrix@@C=2cm{
+    |BTree a|
+           \ar[d]_-{|cataNat g|}
+&
+    |1 + A + expn (X) 2|
+           \ar[d]^{| id + id >< expn (isOrd') 2|}
+           \ar[l]_-{|inBTree|}
+\\
+     |(Bool><X)|
+&
+     |1+ A >< expn ((Bool >< X)) 2|
+           \ar[l]^-{|g|}
+}
+\end{eqnarray*}
+
+\begin{code}
+
 isOrd' = cataBTree g
   where g = either (const (True,Empty)) (c)
         c (a,((False,b2),(c1,c2))) = (False, Node (a,(b2, c2)))
@@ -1046,39 +1211,58 @@ isOrd' = cataBTree g
                                           (Just x, Nothing) -> (x<=a,Node (a,(b2,c2)))
                                           (Nothing, Just x) -> (x>=a,Node (a,(b2,c2)))
                                           (Just x, Just y)  -> (x<=a && y>=a,Node (a,(b2,c2)))
-        
-isOrd = p1. isOrd' 
+
+\end{code}
+
+\subsubsection*{lrot e rrot}
+Ambas as funções foram escritas seguindo as instruções do enunciado. Read-and-code.
+
+\begin{code}
+
 rrot a@(Node (rz,(Empty,tr))) =  a  
 rrot a@(Node (rz,(Node (l,(ll,lr)) ,tr))) = Node (l,(ll,Node (rz,(lr,tr))))
+
 lrot  a@(Node (rz,(tl,Empty))) =  a  
 lrot  a@(Node (rz,(tl,Node (r,(rl,rr))))) = Node (r,(Node(rz,(tl,rl)),rr))
---BTree a -> [Bool] -> BTree
+
+\end{code}
+
+\subsubsection*{Splay}
+
+Uso do flip é para converter a tipagem de [Bool] $->$ (BTree a $->$ BTree a) para BTree a $->$ [Bool] $->$ BTree. 
+O diagrama seguinte é representativo do catamorfismo usado na função splay.
+
+\begin{eqnarray*}
+\xymatrix@@C=2cm{
+    |BTree a|
+           \ar[d]_-{|cataNat g|}
+&
+    |1 + A >< expn (X) 2|
+           \ar[d]^{| id + id >< expn cataNat g 2|}
+           \ar[l]_-{|inBTree|}
+\\
+     |expn X Bool*|
+&
+     |1+ A >< expn ((expn (X) (Bool*))) 2|
+           \ar[l]^-{|g|}
+}
+\end{eqnarray*}
+
+\begin{code}
+
 splay l t =  (flip cataBTree t g) l
           where g = either (\x->const Empty) (curry k)
                 k ((raiz, (t1, t2)), l) = if length l == 0
                                       then Node (raiz, ((t1 l), (t2 l)))
                                    else if head l then rrot $ Node(raiz, ((t1 (tail l)),(t2 [])))
                                   else lrot $ Node(raiz, ((t1 []),(t2 (tail l))))
-          {-
-                k raiz t1 t2 = if list == empty  then Node raiz t1 t2
-                                else list!= empty { (x:xs)
-                                if x then lrot Node(rz t1,t2)
-                                  else rrot (Node rz t1,t2)
-                              }
-          -}
-\end{code}
-
+\end{code}   
+\newpage
 \subsection*{Problema 3}
 
+\subsubsection*{Definições Base}
+
 \begin{code}
-
-bdtGC:: Bdt [Char]
-bdtGC = Query("Chuva na ida?",(Dec "Precisa",Query("Chuva no regresso",
-              (Dec "Precisa",Dec "N precisa"))))
-
-extLTree :: Bdt a -> LTree a
-extLTree = cataBdt g where
-  g = either Leaf (Fork . p2)
 
 inBdt = either Dec Query
 
@@ -1093,25 +1277,119 @@ cataBdt g = g . (recBdt (cataBdt g)) . outBdt
 
 anaBdt g = inBdt . (recBdt (anaBdt g) ) . g
 
+-- bdt testes
+
+bdtGC:: Bdt [Char]
+bdtGC = Query("Chuva na ida?",(Dec "Precisa",
+        Query("Chuva no regresso",
+        (Dec "Precisa",Dec "N precisa"))))
+
+\end{code}
+
+\subsubsection*{Diagrama AnaBdt}
+
+\begin{eqnarray*}
+\xymatrix@@C=4cm{
+    |Bdt a|
+&
+    |A + String >< expn(A)2|
+           \ar[l]_-{|inBdt|}
+\\
+     |C|
+           \ar[u]^-{|ana (g)|}
+           \ar[r]_-{|g|}
+&
+     |A + String >< expn (C) 2|
+           \ar[u]_-{|id + id >< expn(ana(g)2|}
+}
+\end{eqnarray*}
+
+\subsubsection*{ExtLTree}
+\par Neste exercio usamos um catamorfismo que irá transformar um Bdt a numa LTree
+
+
+\begin{eqnarray*}
+\xymatrix@@C=4cm{
+    |Bdt a|
+           \ar[d]_-{|cata (either Leaf (Fork . p2))|}
+           \ar[r]^-{|outBdt|}
+&
+    |A + String >< expn(A)2|
+           \ar[d]^{|id + id >< map (cata (either Leaf (Fork . p2))) |}
+\\
+     |LTree a|
+&
+     |A + String >< expn(Ltree A)2|
+           \ar[l]^-{|either Leaf (Fork . p2)|}
+}
+\end{eqnarray*}
+
+\begin{code}
+
+extLTree :: Bdt a -> LTree a
+extLTree = cataBdt g where
+  g = either Leaf (Fork . p2)
+
+\end{code}
+
+\subsubsection*{navLTree}
+\par Neste exercício usamos um catamorfismo que irá percorrer uma lista de boolean, de forma a ter a lista no catamorfismo
+usamos o curry, assim, este catamorfismo irá returnar uma função.
+
+
+\begin{eqnarray*}
+\xymatrix@@C=4cm{
+    |LTree a|
+           \ar[d]_-{|cata (either g1 g2|}
+           \ar[r]^-{|outBdt|}
+&
+    |A + expn (LTree a) 2|
+           \ar[d]^{|id + (cata (either g1 g2)) |}
+\\
+     |expn (LTree a) (expn (Bool)*)|
+&
+     |A + expn ((expn (Ltree a) (Bool*))) 2|
+           \ar[l]^-{|either g1 g2|}
+}
+\end{eqnarray*}
+
+
+\begin{code}               
 navLTree :: LTree a -> ([Bool] -> LTree a)
 navLTree lt lstB = (cataLTree g lt) lstB where 
   g = either (curry g1) (curry g2)
-  g1 (a,_) = Leaf a
+  g1 = Leaf . p1
   g2 ((l,r),lst) | length lst == 0 = Fork(l lst,r lst)
                  | head lst == True = l $ tail $ lst
                  | otherwise = r $ tail $ lst
-                  
-\end{code}
 
+\end{code}
 
 \subsection*{Problema 4}
  
 
-\begin{code}
+\subsubsection*{bnavLtree}
+\par Neste exercício o raciocínio foi identico ao último exercício do problema anterior só que desta
+vez o catamorfismo irá consumir uma BTree Bool.
 
-anita :: Bdt [Char]
-anita = Query("2a-feira?",(Query("Chuva na ida?",(Dec "Precisa",Query("Chuva no regresso",
-        (Dec "Precisa",Dec "N precisa")))),Dec "N precisa"))
+
+\begin{eqnarray*}
+\xymatrix@@C=4cm{
+    |LTree a|
+           \ar[d]_-{|cata (either g1 g2|}
+           \ar[r]^-{|outBdt|}
+&
+    |A + expn (LTree a) 2|
+           \ar[d]^{|id + (cata (either g1 g2)) |}
+\\
+     |expn (LTree a) (BTree Bool)|
+&
+     |A + expn ((expn (Ltree a) (BTree Bool))) 2|
+           \ar[l]^-{|either g1 g2|}
+}
+\end{eqnarray*}
+
+\begin{code}
 
 bnavLTree lt bt = (cataLTree g lt) bt
   where g = either (curry g1) (curry g2)
@@ -1123,48 +1401,34 @@ bnavLTree lt bt = (cataLTree g lt) bt
                                        | rz == False = r $ t1
         g2((l,r),Node (rz,(Empty,t2))) | rz == True = l $ t2
                                        | rz == False = r $ t2
-
-
-pbnavLTree lt bt = cataLTree g lt bt
-  where g = either (curry g1) (curry g2)
-        g1(a,bt) = return (Leaf a,bt)
-        g2((l,r),Empty) = return (Fork(l Empty,r Empty))
-        g2((l,r),Node (D((bool,p):xs),(Empty,Empty))) | bool == True = return(l Empty)
-                                                    
-
 \end{code}
 
+\begin{code}
+pbnavLTree lt bt = cataLTree g lt bt
+  where g =  undefined 
+
+
+-- bdt testes
+anita :: Bdt [Char]
+anita = Query("2a-feira?",(Query("Chuva na ida?",
+        (Dec "Precisa",Query("Chuva no regresso",
+        (Dec "Precisa",Dec "N precisa")))),Dec "N precisa"))
+\end{code}
+\newpage
+
 \subsection*{Problema 5}
+
+\subsubsection*{GeraMosaicos e geraLista}
+
+Ambas as funções são feitas para resolver dois problemas. Um para gerar mosaicos, que neste caso já é feito de forma aleatória graças à função Random e outra gera as coordenadas corretas que serão atribuidas a cada a cada mosaico para assim estarem corretamente dispostas.
 
 \begin{code}
 
 truchet1 = Pictures [ put (0,80) (Arc (-90) 0 40), put (80,0) (Arc 90 180 40) ]
-
 truchet2 = Pictures [ put (0,0) (Arc 0 90 40), put (80,80) (Arc 180 (-90) 40) ]
 
---- janela para visualizar:
-
-janela = InWindow
-             "Truchet"        -- window title
-             (800, 800)       -- window size
-             (100,100)        -- window position
-
------ defs auxiliares -------------
-
-put  = uncurry Translate 
-
--------------------------------------------------
-geraTrunchet (a,b) = fmap pictures $ M.join $ fmap (permuta.map (uncurry put)) $ liftM2 zip posicoes mosaicos
-                    where mosaicos = auxGera (a*b)
-                          posicoes = return $ map (toFloat >< toFloat) $ geraLista (a,b) 
-
-
-monadCompo :: (Int,Int) -> IO()
-monadCompo = geraTrunchet >=> display janela white 
-
---gera mosaicos aleatorios
-auxGera :: Int -> IO [Picture]
-auxGera x = replicateM x (fmap f $ randomRIO(0::Integer,1::Integer)) 
+geraMosaicos :: Int -> IO [Picture]
+geraMosaicos x = replicateM x (fmap f $ randomRIO(0::Integer,1::Integer)) 
           where f a = if a==0 then truchet1 else truchet2
 
 geraLista :: (Int,Int)-> [(Int,Int)]
@@ -1173,6 +1437,39 @@ geraLista (x,y) = map f $[(a,b)| a<-[0..x-1], b<-[0..y-1]]
                       f (i,j) = (se1+(i*80),se2+(j*80))
 
 \end{code}
+
+\subsubsection*{geraTrunchet e monadCompo}
+
+Esta fase da resolução remete-se a resolver 2 problemas. Primeiro, ligar cada mosaico às coordenadas correspondentes e finalmente,inferir os tipos monádicos corretos para poder gerar a imagem. 
+A imagem é gerada graças à função monadCompo.
+
+\begin{code}
+geraTruchet :: (Int,Int) -> IO(Picture)
+geraTruchet (a,b) = fmap pictures $ M.join $ fmap (permuta.map (uncurry put)) $ liftM2 zip posicoes mosaicos
+                    where mosaicos = geraMosaicos (a*b)
+                          posicoes = return $ map (toFloat >< toFloat) $ geraLista (a,b) 
+
+
+monadCompo :: (Int,Int) -> IO()
+monadCompo = geraTruchet >=> display janela white 
+
+
+--- janela para visualizar:
+janela = InWindow
+             "Truchet"        -- window title
+             (800, 800)       -- window size
+             (100,100)        -- window position
+----- defs auxiliares -------------
+put  = uncurry Translate 
+-------------------------------------------------
+
+\end{code}
+
+  \begin{figure}[H]\centering       
+  \includegraphics[scale=0.15]{images/moisaico.png}
+  \caption{Moisaico gerado}
+  \label{fig:m}          
+  \end{figure}
 
 %----------------- Fim do anexo com soluções dos alunos ------------------------%
 
