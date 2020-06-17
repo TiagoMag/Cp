@@ -123,7 +123,7 @@ a85517 & Duarte Manuel Vilar de Oliveira
 \\
 a84485 & Tiago Henrique de Oliveira Magalhães	
 \\
-a33333 & Nome3 (preencher)	
+
 \end{tabular}
 \end{center}
 
@@ -1095,14 +1095,15 @@ dic_in p t d = undefined
 \newpage
 \subsection*{Problema 2}
 
+Para todos os seguintes diagramas é de notar que X = BTree A.
+
 \subsubsection*{maisDir e maisEsq}
 Para as funções "maisDir" e "maisEsq" procedeu-se de forma similar: empregou-se um catamorfismo ligeramente distinto entre si a ambas as funções. Este, iterando sobre as sub-àrvores da Binary Tree principal, procedia ao calculo do elemento mais à esquerda, no caso da função "maisEsq", ou mais à direita, no caso da "maisDir".
-Para todos os seguintes diagramas é de notar que A = BTree a.
 
 \begin{eqnarray*}
 \xymatrix@@C=2cm{
-    |BTree a|
-           \ar[d]_-{|cataNat g|}
+    |BTree A|
+           \ar[d]_-{maisDir = |cata g|}
 &
     |1 + A + expn (X) 2|
            \ar[d]^{| id + id >< expn (maisDir) 2|}
@@ -1126,8 +1127,8 @@ maisDir = cataBTree g
 
 \begin{eqnarray*}
 \xymatrix@@C=2cm{
-    |BTree a|
-           \ar[d]_-{|cataNat g|}
+    |BTree A|
+           \ar[d]_-{maisEsq = |cata g|}
 &
     |1 + A + expn (X) 2|
            \ar[d]^{| id + id >< expn (maisEsq) 2|}
@@ -1156,16 +1157,16 @@ com o novo elemento adicionado, enquanto que na isOrd retira-se o Bool que indic
 
 \begin{eqnarray*}
 \xymatrix@@C=2cm{
-    |BTree a|
-           \ar[d]_-{|cataNat g|}
+    |BTree A|
+           \ar[d]_-{|insOrd' = cata g|}
 &
     |1 + A + expn (X) 2|
            \ar[d]^{| id + id >< expn (insOrd') 2|}
            \ar[l]_-{|inBTree|}
 \\
-     |A><A|
+     |X >< X|
 &
-     |1 + A >< expn ((A><A)) 2|
+     |1 + A >< expn ((X >< X)) 2|
            \ar[l]^-{|g|}
 }
 \end{eqnarray*}
@@ -1186,8 +1187,8 @@ isOrd = p1 . isOrd'
 
 \begin{eqnarray*}
 \xymatrix@@C=2cm{
-    |BTree a|
-           \ar[d]_-{|cataNat g|}
+    |BTree A|
+           \ar[d]_-{|isOrd' =  cata g|}
 &
     |1 + A + expn (X) 2|
            \ar[d]^{| id + id >< expn (isOrd') 2|}
@@ -1234,11 +1235,11 @@ O diagrama seguinte é representativo do catamorfismo usado na função splay.
 
 \begin{eqnarray*}
 \xymatrix@@C=2cm{
-    |BTree a|
-           \ar[d]_-{|cataNat g|}
+    |BTree A|
+           \ar[d]_-{|cata g|}
 &
     |1 + A >< expn (X) 2|
-           \ar[d]^{| id + id >< expn cataNat g 2|}
+           \ar[d]^{| id + id >< expn (cata (g)) 2|}
            \ar[l]_-{|inBTree|}
 \\
      |expn X Bool*|
@@ -1290,9 +1291,9 @@ bdtGC = Query("Chuva na ida?",(Dec "Precisa",
 
 \begin{eqnarray*}
 \xymatrix@@C=4cm{
-    |Bdt a|
+    |Bdt A|
 &
-    |A + String >< expn(A)2|
+    |A + String >< expn((Bdt A))2|
            \ar[l]_-{|inBdt|}
 \\
      |C|
@@ -1310,16 +1311,16 @@ bdtGC = Query("Chuva na ida?",(Dec "Precisa",
 
 \begin{eqnarray*}
 \xymatrix@@C=4cm{
-    |Bdt a|
+    |Bdt A|
            \ar[d]_-{|cata (either Leaf (Fork . p2))|}
            \ar[r]^-{|outBdt|}
 &
-    |A + String >< expn(A)2|
+    |A + String >< expn(Bdt A)2|
            \ar[d]^{|id + id >< map (cata (either Leaf (Fork . p2))) |}
 \\
-     |LTree a|
+     |LTree A|
 &
-     |A + String >< expn(Ltree A)2|
+     |A + String >< expn((Ltree A))2|
            \ar[l]^-{|either Leaf (Fork . p2)|}
 }
 \end{eqnarray*}
@@ -1339,16 +1340,16 @@ usamos o curry, assim, este catamorfismo irá returnar uma função.
 
 \begin{eqnarray*}
 \xymatrix@@C=4cm{
-    |LTree a|
+    |LTree A|
            \ar[d]_-{|cata (either g1 g2|}
            \ar[r]^-{|outBdt|}
 &
-    |A + expn (LTree a) 2|
+    |A + expn ((LTree A)) 2|
            \ar[d]^{|id + (cata (either g1 g2)) |}
 \\
-     |expn (LTree a) (expn (Bool)*)|
+     |expn (LTree A) (expn (Bool)*)|
 &
-     |A + expn ((expn (Ltree a) (Bool*))) 2|
+     |A + expn ((expn (LTree A) (Bool*))) 2|
            \ar[l]^-{|either g1 g2|}
 }
 \end{eqnarray*}
@@ -1375,16 +1376,16 @@ vez o catamorfismo irá consumir uma BTree Bool.
 
 \begin{eqnarray*}
 \xymatrix@@C=4cm{
-    |LTree a|
+    |LTree A|
            \ar[d]_-{|cata (either g1 g2|}
            \ar[r]^-{|outBdt|}
 &
-    |A + expn (LTree a) 2|
+    |A + expn ((LTree A)) 2|
            \ar[d]^{|id + (cata (either g1 g2)) |}
 \\
-     |expn (LTree a) (BTree Bool)|
+     |expn (LTree A) (BTree Bool)|
 &
-     |A + expn ((expn (Ltree a) (BTree Bool))) 2|
+     |A + expn ((expn (LTree A) (BTree Bool))) 2|
            \ar[l]^-{|either g1 g2|}
 }
 \end{eqnarray*}

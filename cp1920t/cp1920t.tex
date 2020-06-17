@@ -306,7 +306,7 @@ a85517 & Duarte Manuel Vilar de Oliveira
 \\
 a84485 & Tiago Henrique de Oliveira Magalhães	
 \\
-a33333 & Nome3 (preencher)	
+
 \end{tabular}
 \end{center}
 
@@ -1537,14 +1537,15 @@ catamorfismo irá devolver as traduções.
 \newpage
 \subsection*{Problema 2}
 
+Para todos os seguintes diagramas é de notar que X = BTree A.
+
 \subsubsection*{maisDir e maisEsq}
 Para as funções "maisDir" e "maisEsq" procedeu-se de forma similar: empregou-se um catamorfismo ligeramente distinto entre si a ambas as funções. Este, iterando sobre as sub-àrvores da Binary Tree principal, procedia ao calculo do elemento mais à esquerda, no caso da função "maisEsq", ou mais à direita, no caso da "maisDir".
-Para todos os seguintes diagramas é de notar que A = BTree a.
 
 \begin{eqnarray*}
 \xymatrix@C=2cm{
-    \ensuremath{\fun{BTree} \;\Varid{a}}
-           \ar[d]_-{\ensuremath{\cata{\Varid{g}}}}
+    \ensuremath{\fun{BTree} \;\Conid{A}}
+           \ar[d]_-{maisDir = \ensuremath{\cata{\Varid{g}}}}
 &
     \ensuremath{\mathrm{1}\mathbin{+}\Conid{A}\mathbin{+}{\Conid{X}}^{\mathrm{2}}}
            \ar[d]^{\ensuremath{\Varid{id}\mathbin{+}\Varid{id}\times{\Varid{maisDir}}^{\mathrm{2}}}}
@@ -1577,8 +1578,8 @@ Para todos os seguintes diagramas é de notar que A = BTree a.
 
 \begin{eqnarray*}
 \xymatrix@C=2cm{
-    \ensuremath{\fun{BTree} \;\Varid{a}}
-           \ar[d]_-{\ensuremath{\cata{\Varid{g}}}}
+    \ensuremath{\fun{BTree} \;\Conid{A}}
+           \ar[d]_-{maisEsq = \ensuremath{\cata{\Varid{g}}}}
 &
     \ensuremath{\mathrm{1}\mathbin{+}\Conid{A}\mathbin{+}{\Conid{X}}^{\mathrm{2}}}
            \ar[d]^{\ensuremath{\Varid{id}\mathbin{+}\Varid{id}\times{\Varid{maisEsq}}^{\mathrm{2}}}}
@@ -1616,16 +1617,16 @@ com o novo elemento adicionado, enquanto que na isOrd retira-se o Bool que indic
 
 \begin{eqnarray*}
 \xymatrix@C=2cm{
-    \ensuremath{\fun{BTree} \;\Varid{a}}
-           \ar[d]_-{\ensuremath{\cata{\Varid{g}}}}
+    \ensuremath{\fun{BTree} \;\Conid{A}}
+           \ar[d]_-{\ensuremath{\Varid{insOrd'}\mathrel{=}\cata{\Varid{g}}}}
 &
     \ensuremath{\mathrm{1}\mathbin{+}\Conid{A}\mathbin{+}{\Conid{X}}^{\mathrm{2}}}
            \ar[d]^{\ensuremath{\Varid{id}\mathbin{+}\Varid{id}\times{\Varid{insOrd'}}^{\mathrm{2}}}}
            \ar[l]_-{\ensuremath{\Varid{inBTree}}}
 \\
-     \ensuremath{\Conid{A}\times\Conid{A}}
+     \ensuremath{\Conid{X}\times\Conid{X}}
 &
-     \ensuremath{\mathrm{1}\mathbin{+}\Conid{A}\times{(\Conid{A}\times\Conid{A})}^{\mathrm{2}}}
+     \ensuremath{\mathrm{1}\mathbin{+}\Conid{A}\times{(\Conid{X}\times\Conid{X})}^{\mathrm{2}}}
            \ar[l]^-{\ensuremath{\Varid{g}}}
 }
 \end{eqnarray*}
@@ -1661,8 +1662,8 @@ com o novo elemento adicionado, enquanto que na isOrd retira-se o Bool que indic
 
 \begin{eqnarray*}
 \xymatrix@C=2cm{
-    \ensuremath{\fun{BTree} \;\Varid{a}}
-           \ar[d]_-{\ensuremath{\cata{\Varid{g}}}}
+    \ensuremath{\fun{BTree} \;\Conid{A}}
+           \ar[d]_-{\ensuremath{\Varid{isOrd'}\mathrel{=}\cata{\Varid{g}}}}
 &
     \ensuremath{\mathrm{1}\mathbin{+}\Conid{A}\mathbin{+}{\Conid{X}}^{\mathrm{2}}}
            \ar[d]^{\ensuremath{\Varid{id}\mathbin{+}\Varid{id}\times{\Varid{isOrd'}}^{\mathrm{2}}}}
@@ -1741,11 +1742,11 @@ O diagrama seguinte é representativo do catamorfismo usado na função splay.
 
 \begin{eqnarray*}
 \xymatrix@C=2cm{
-    \ensuremath{\fun{BTree} \;\Varid{a}}
+    \ensuremath{\fun{BTree} \;\Conid{A}}
            \ar[d]_-{\ensuremath{\cata{\Varid{g}}}}
 &
     \ensuremath{\mathrm{1}\mathbin{+}\Conid{A}\times{\Conid{X}}^{\mathrm{2}}}
-           \ar[d]^{\ensuremath{\Varid{id}\mathbin{+}\Varid{id}\times{\cata{\cdot }}^{\Varid{g}}\;\mathrm{2}}}
+           \ar[d]^{\ensuremath{\Varid{id}\mathbin{+}\Varid{id}\times{\cata{\Varid{g}}}^{\mathrm{2}}}}
            \ar[l]_-{\ensuremath{\Varid{inBTree}}}
 \\
      \ensuremath{{\Conid{X}}^{\Conid{Bool}}\mathbin{*}}
@@ -1824,9 +1825,9 @@ O diagrama seguinte é representativo do catamorfismo usado na função splay.
 
 \begin{eqnarray*}
 \xymatrix@C=4cm{
-    \ensuremath{\Conid{Bdt}\;\Varid{a}}
+    \ensuremath{\Conid{Bdt}\;\Conid{A}}
 &
-    \ensuremath{\Conid{A}\mathbin{+}\Conid{String}\times{\Conid{A}}^{\mathrm{2}}}
+    \ensuremath{\Conid{A}\mathbin{+}\Conid{String}\times{(\Conid{Bdt}\;\Conid{A})}^{\mathrm{2}}}
            \ar[l]_-{\ensuremath{\Varid{inBdt}}}
 \\
      \ensuremath{\mathit C}
@@ -1844,16 +1845,16 @@ O diagrama seguinte é representativo do catamorfismo usado na função splay.
 
 \begin{eqnarray*}
 \xymatrix@C=4cm{
-    \ensuremath{\Conid{Bdt}\;\Varid{a}}
+    \ensuremath{\Conid{Bdt}\;\Conid{A}}
            \ar[d]_-{\ensuremath{\cata{\alt{\Conid{Leaf}}{\Conid{Fork}\comp \p2}}}}
            \ar[r]^-{\ensuremath{\Varid{outBdt}}}
 &
-    \ensuremath{\Conid{A}\mathbin{+}\Conid{String}\times{\Conid{A}}^{\mathrm{2}}}
+    \ensuremath{\Conid{A}\mathbin{+}\Conid{String}\times{\Conid{Bdt}\;\Conid{A}}^{\mathrm{2}}}
            \ar[d]^{\ensuremath{\Varid{id}\mathbin{+}\Varid{id}\times\map \;\cata{\alt{\Conid{Leaf}}{\Conid{Fork}\comp \p2}}}}
 \\
-     \ensuremath{\mathsf{LTree}\;\Varid{a}}
+     \ensuremath{\mathsf{LTree}\;\Conid{A}}
 &
-     \ensuremath{\Conid{A}\mathbin{+}\Conid{String}\times{\Conid{Ltree}\;\Conid{A}}^{\mathrm{2}}}
+     \ensuremath{\Conid{A}\mathbin{+}\Conid{String}\times{(\Conid{Ltree}\;\Conid{A})}^{\mathrm{2}}}
            \ar[l]^-{\ensuremath{\alt{\Conid{Leaf}}{\Conid{Fork}\comp \p2}}}
 }
 \end{eqnarray*}
@@ -1878,16 +1879,16 @@ usamos o curry, assim, este catamorfismo irá returnar uma função.
 
 \begin{eqnarray*}
 \xymatrix@C=4cm{
-    \ensuremath{\mathsf{LTree}\;\Varid{a}}
+    \ensuremath{\mathsf{LTree}\;\Conid{A}}
            \ar[d]_-{\ensuremath{\cata{\alt{\Varid{g1}}{\Varid{g2}}}}}
            \ar[r]^-{\ensuremath{\Varid{outBdt}}}
 &
-    \ensuremath{\Conid{A}\mathbin{+}{\mathsf{LTree}\;\Varid{a}}^{\mathrm{2}}}
+    \ensuremath{\Conid{A}\mathbin{+}{(\mathsf{LTree}\;\Conid{A})}^{\mathrm{2}}}
            \ar[d]^{\ensuremath{\Varid{id}\mathbin{+}\cata{\alt{\Varid{g1}}{\Varid{g2}}}}}
 \\
-     \ensuremath{{\mathsf{LTree}\;\Varid{a}}^{{\Conid{Bool}}^{\cdot }\mathbin{*}}}
+     \ensuremath{{\mathsf{LTree}\;\Conid{A}}^{{\Conid{Bool}}^{\cdot }\mathbin{*}}}
 &
-     \ensuremath{\Conid{A}\mathbin{+}{({\Conid{Ltree}\;\Varid{a}}^{\Conid{Bool}\mathbin{*}})}^{\mathrm{2}}}
+     \ensuremath{\Conid{A}\mathbin{+}{({\mathsf{LTree}\;\Conid{A}}^{\Conid{Bool}\mathbin{*}})}^{\mathrm{2}}}
            \ar[l]^-{\ensuremath{\alt{\Varid{g1}}{\Varid{g2}}}}
 }
 \end{eqnarray*}
@@ -1929,16 +1930,16 @@ vez o catamorfismo irá consumir uma BTree Bool.
 
 \begin{eqnarray*}
 \xymatrix@C=4cm{
-    \ensuremath{\mathsf{LTree}\;\Varid{a}}
+    \ensuremath{\mathsf{LTree}\;\Conid{A}}
            \ar[d]_-{\ensuremath{\cata{\alt{\Varid{g1}}{\Varid{g2}}}}}
            \ar[r]^-{\ensuremath{\Varid{outBdt}}}
 &
-    \ensuremath{\Conid{A}\mathbin{+}{\mathsf{LTree}\;\Varid{a}}^{\mathrm{2}}}
+    \ensuremath{\Conid{A}\mathbin{+}{(\mathsf{LTree}\;\Conid{A})}^{\mathrm{2}}}
            \ar[d]^{\ensuremath{\Varid{id}\mathbin{+}\cata{\alt{\Varid{g1}}{\Varid{g2}}}}}
 \\
-     \ensuremath{{\mathsf{LTree}\;\Varid{a}}^{\fun{BTree} \;\Conid{Bool}}}
+     \ensuremath{{\mathsf{LTree}\;\Conid{A}}^{\fun{BTree} \;\Conid{Bool}}}
 &
-     \ensuremath{\Conid{A}\mathbin{+}{({\Conid{Ltree}\;\Varid{a}}^{\fun{BTree} \;\Conid{Bool}})}^{\mathrm{2}}}
+     \ensuremath{\Conid{A}\mathbin{+}{({\mathsf{LTree}\;\Conid{A}}^{\fun{BTree} \;\Conid{Bool}})}^{\mathrm{2}}}
            \ar[l]^-{\ensuremath{\alt{\Varid{g1}}{\Varid{g2}}}}
 }
 \end{eqnarray*}
