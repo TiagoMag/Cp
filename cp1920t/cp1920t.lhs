@@ -117,7 +117,7 @@
 
 \begin{center}\large
 \begin{tabular}{ll}
-\textbf{Grupo} nr. & 99 (preencher)
+\textbf{Grupo} nr. & 17
 \\\hline
 a85517 & Duarte Manuel Vilar de Oliveira
 \\
@@ -1444,10 +1444,12 @@ Esta fase da resolução remete-se a resolver 2 problemas. Primeiro, ligar cada 
 A imagem é gerada graças à função monadCompo.
 
 \begin{code}
+
 geraTruchet :: (Int,Int) -> IO(Picture)
 geraTruchet (a,b) = fmap pictures $ M.join $ fmap (permuta.map (uncurry put)) $ liftM2 zip posicoes mosaicos
                     where mosaicos = geraMosaicos (a*b)
                           posicoes = return $ map (toFloat >< toFloat) $ geraLista (a,b) 
+
 
 
 monadCompo :: (Int,Int) -> IO()
