@@ -1,3 +1,3 @@
 # Cp
 Projeto de CP
-Realizado com Tiago Magalhães
+Realizado com [Duarte Vilar Oliveira](https://github.com/mishlawi)
